@@ -105,10 +105,21 @@ window.addEventListener("keydown", function(e) {
     }
 });
 
+// Function to handle keyboard inputs
+window.addEventListener("keydown", function(e) {
+    if (e.code === "Space" && !player.jumping && player.jumps < 2) {  // start jump
+        player.jumpStart = Date.now();
+        player.dy = -10;  // default jump velocity
+        player.jumping = true;
+        player.jumps++;  // increment jumps
+    }
+});
+
 window.addEventListener("keyup", function(e) {
     if (e.code === "Space" && player.jumping) {  // end jump
         var jumpDuration = Date.now() - player.jumpStart;
         player.dy = -Math.max(player.dy, Math.min(jumpDuration / 100, 10));  // increase jump velocity up to a limit
+        player.jumping = false;  // set jumping to false when jump ends
     }
 });
 
