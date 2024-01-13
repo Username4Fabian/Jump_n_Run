@@ -31,9 +31,21 @@ var ground = {
 
 // Define obstacles
 var obstacles = [];
+// Define last obstacle
+var lastObstacle = {
+    x: 0,
+    width: 20 // initial obstacle width
+};
+
 function generateObstacle() {
+    // Calculate max jump distance
+    var maxJumpDistance = player.dx * 2; // Assuming the player can jump twice the distance of their speed
+
+    // Calculate obstacle x position
+    var obstacleX = Math.max(canvas.width, lastObstacle.x + lastObstacle.width + maxJumpDistance);
+
     var obstacle = {
-        x: canvas.width,
+        x: obstacleX,
         y: ground.y - 20,
         width: 20,
         height: 20,
@@ -41,6 +53,9 @@ function generateObstacle() {
         dx: -2 - score * 0.001
     };
     obstacles.push(obstacle);
+
+    // Update last obstacle
+    lastObstacle = obstacle;
 }
 
 // Define score
