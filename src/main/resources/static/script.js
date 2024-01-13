@@ -17,7 +17,7 @@ var player = {
     jumping: false,
     gravity: 0.5,
     jumpStart: 0,
-    jumps: 0  // add jumps property
+    jumps: 0
 };
 
 // Define ground
@@ -38,7 +38,7 @@ function generateObstacle() {
         width: 20,
         height: 20,
         color: "red",
-        dx: -2
+        dx: -2 - score * 0.001
     };
     obstacles.push(obstacle);
 }
@@ -74,17 +74,18 @@ function update() {
         player.y = ground.y - player.height;
         player.dy = 0;
         player.jumping = false;
-        player.jumps = 0;  // reset jumps when player lands
+        player.jumps = 0;
     }
     // Prevent player from moving outside the canvas
     if (player.y < 0) {
         player.y = 0;
-        player.dy = 0;  // stop upward movement
+        player.dy = 0;
     }
     obstacles.forEach(function(obstacle) {
+        obstacle.dx -= 0.001;
         obstacle.x += obstacle.dx;
     });
-    if (Math.random() < 0.01) {  // 1% chance to generate a new obstacle each frame
+    if (Math.random() < 0.01) {
         generateObstacle();
     }
     // Increment score every 20 frames
@@ -97,29 +98,19 @@ function update() {
 
 // Function to handle keyboard inputs
 window.addEventListener("keydown", function(e) {
-    if (e.code === "Space" && player.jumps < 2) {  // start jump
+    if (e.code === "Space" && player.jumps < 2) {
         player.jumpStart = Date.now();
-        player.dy = -10;  // default jump velocity
+        player.dy = -10;
         player.jumping = true;
-        player.jumps++;  // increment jumps
-    }
-});
-
-// Function to handle keyboard inputs
-window.addEventListener("keydown", function(e) {
-    if (e.code === "Space" && !player.jumping && player.jumps < 2) {  // start jump
-        player.jumpStart = Date.now();
-        player.dy = -10;  // default jump velocity
-        player.jumping = true;
-        player.jumps++;  // increment jumps
+        player.jumps++;
     }
 });
 
 window.addEventListener("keyup", function(e) {
-    if (e.code === "Space" && player.jumping) {  // end jump
+    if (e.code === "Space" && player.jumping) {
         var jumpDuration = Date.now() - player.jumpStart;
-        player.dy = -Math.max(player.dy, Math.min(jumpDuration / 100, 10));  // increase jump velocity up to a limit
-        player.jumping = false;  // set jumping to false when jump ends
+        player.dy = -Math.max(player.dy, Math.min(jumpDuration / 100, 10));
+        player.jumping = false;
     }
 });
 
@@ -145,7 +136,7 @@ function loop() {
         ctx.font = "30px Arial";
         ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
         gameOver = true;
-        return;  // stop the game loop
+        return;
     }
     update();
     draw();
@@ -161,9 +152,9 @@ window.addEventListener("keydown", function(e) {
         player.y = 400;
         player.dy = 0;
         player.jumping = false;
-        player.jumps = 0;  // reset jumps
+        player.jumps = 0;
         obstacles = [];
-        score = 0;  // reset score
+        score = 0;
         gameOver = false;
         // Start game loop
         loop();
