@@ -5,7 +5,7 @@ var config = {
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 300 },
+            gravity: { y: 800 },
             debug: false
         }
     },
@@ -29,43 +29,52 @@ function preload() {
 function create() {
     // Get the original size of the background image
     let bgImage = this.textures.get('background').getSourceImage();
-
-    // Calculate the scale factor to fit the height of the game canvas
     let scale = this.sys.game.config.height / bgImage.height;
+    let widthScale = this.sys.game.config.width / (bgImage.width * scale);
 
-    // Create the tileSprite with the calculated scale factor
-    bg = this.add.tileSprite(0, 0, bgImage.width * scale, this.sys.game.config.height, 'background')
+    bg = this.add.tileSprite(0, 0, bgImage.width, bgImage.height, 'background')
         .setOrigin(0, 0)
-        .setScale(scale);
+        .setScale(scale * widthScale, scale);
 
-    player = this.physics.add.sprite(50, 400, 'player');
+    player = this.physics.add.sprite(50, 500, 'player');
     player.setBounce(0.2);
     player.setCollideWorldBounds(true);
     player.setScale(0.08);
+
+    // Create an invisible ground
+    let ground = this.physics.add.staticGroup();
+    let groundSprite = ground.create(scale, this.sys.game.config.height);
+    console.log(scale)
+    groundSprite.setScale(200, scale * 12).refreshBody();
+    groundSprite.setVisible(false);
+
+    // Add collision detection between the player and the ground
+    this.physics.add.collider(player, ground);
+
     cursors = this.input.keyboard.createCursorKeys();
 }
 
 function update() {
     if (cursors.right.isDown) {
-        player.setVelocityX(-160);
-        bg.tilePositionX += 5;
+        player.setVelocityX(200); // Increase velocity for faster movement
     } else if (cursors.left.isDown) {
-        player.setVelocityX(160);
-        bg.tilePositionX -= 5;
+        player.setVelocityX(-200); // Increase velocity for faster movement
     } else {
         player.setVelocityX(0);
     }
 
-    if (cursors.up.isDown && player.body.blocked.down) {
-        player.setVelocityY(-330);
+    // Update the background's position regardless of whether the left or right arrow key is being pressed
+    bg.tilePositionX += player.body.velocity.x / 40;
+
+    if (cursors.up.isDown && player.body.touching.down) {
+        player.setVelocityY(-500); // Increase velocity for higher jump
     }
 
     // Add some drag to the player's movement
     player.body.velocity.x *= 0.9;
 
-    // Check if the player is touching the ground
-    if (player.body.blocked.down) {
-        // Reset the player's vertical velocity
+    // Only reset the player's vertical velocity if they're not currently jumping
+    if (player.body.touching.down && player.body.velocity.y > 0) {
         player.body.velocity.y = 0;
     }
 }
