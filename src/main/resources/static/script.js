@@ -56,18 +56,20 @@ function create() {
 
 function update() {
     if (cursors.right.isDown) {
-        player.setVelocityX(200); // Increase velocity for faster movement
+        if (player.x < game.config.width * 0.6) {
+            player.setVelocityX(300); // Increase velocity for faster movement
+        } else {
+            player.setVelocityX(0); // Stop the player
+            bg.tilePositionX += 10; // Scroll the background at a faster speed
+        }
     } else if (cursors.left.isDown) {
-        player.setVelocityX(-200); // Increase velocity for faster movement
+        player.setVelocityX(-300); // Increase velocity for faster movement
     } else {
         player.setVelocityX(0);
     }
 
-    // Update the background's position regardless of whether the left or right arrow key is being pressed
-    bg.tilePositionX += player.body.velocity.x / 40;
-
     if (cursors.up.isDown && player.body.touching.down) {
-        player.setVelocityY(-500); // Increase velocity for higher jump
+        player.setVelocityY(-700); // Increase velocity for higher jump
     }
 
     // Add some drag to the player's movement
