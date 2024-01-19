@@ -51,3 +51,6 @@ build/
 
 # Ignore Spring Boot DevTools property file
 spring-boot-devtools.properties
+
+.DS_Store
+
