@@ -30,7 +30,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
         scene.add.existing(this);
         scene.physics.add.existing(this);
         this.setCollideWorldBounds(false);
-        this.setVelocityX(-160);
+        this.setVelocityX(0);
         this.alive = true;
         this.setScale(0.1);
     }
@@ -42,8 +42,17 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
             this.setActive(false);
             this.body.destroy();
         } else {
-            let direction = this.scene.player.x - this.x;
-            this.setVelocityX(160 * Math.sign(direction));
+            if (this.scene.background.isScrolling) {
+                this.setVelocityX(-150); 
+            } else {
+                let direction = this.scene.player.x - this.x;
+                let speed = 160; 
+                this.setVelocityX(speed * Math.sign(direction));
+            }
+
+            if (this.x < -this.width) {
+                this.destroy();
+            }
         }
     }
 }
@@ -61,10 +70,13 @@ class Background {
     }
 
     update(player, cursors) {
+        this.isScrolling = false;
         if (cursors.right.isDown) {
             if (player.x < this.scene.sys.game.config.width * 0.6) {
+                this.isScrolling = false;
                 player.setVelocityX(300);
             } else {
+                this.isScrolling = true;
                 player.setVelocityX(0);
                 this.bg.tilePositionX += 10;
             }
@@ -105,16 +117,17 @@ class GameScene extends Phaser.Scene {
             runChildUpdate: true,
         });
 
+        this.physics.add.collider(this.enemies, this.enemies);
         this.physics.add.collider(this.enemies, ground);
         this.physics.add.collider(this.player, this.enemies, this.handleCollision, null, this);
     }
-
+    
     update() {
         this.player.update();
         this.background.update(this.player, this.cursors);
 
         if (Math.random() < 0.005) {
-            const x = this.sys.game.config.width;
+            const x = this.sys.game.config.width * 1.2;
             const y = this.background.scale * 12;
             this.enemies.add(new Enemy(this, x, y));
         }
