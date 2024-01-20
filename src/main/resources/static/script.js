@@ -20,16 +20,19 @@ var game = new Phaser.Game(config);
 var player;
 var cursors;
 var bg;
+var enemies;
+var scale;
 
 function preload() {
     this.load.image('background', 'images/background.png');
     this.load.image('player', 'images/player.png');
+    this.load.image('enemy', 'images/enemy.png'); 
 }
 
 function create() {
     // Get the original size of the background image
     let bgImage = this.textures.get('background').getSourceImage();
-    let scale = this.sys.game.config.height / bgImage.height;
+    scale = this.sys.game.config.height / bgImage.height;
     let widthScale = this.sys.game.config.width / (bgImage.width * scale);
 
     bg = this.add.tileSprite(0, 0, bgImage.width, bgImage.height, 'background')
@@ -40,6 +43,8 @@ function create() {
     player.setBounce(0.2);
     player.setCollideWorldBounds(true);
     player.setScale(0.08);
+    this.player = player; 
+
 
     // Create an invisible ground
     let ground = this.physics.add.staticGroup();
@@ -50,8 +55,16 @@ function create() {
 
     // Add collision detection between the player and the ground
     this.physics.add.collider(player, ground);
-
     cursors = this.input.keyboard.createCursorKeys();
+
+    enemies = this.physics.add.group({
+        classType: Enemy,
+        runChildUpdate: true, // This will call the update method of each enemy
+    });
+
+    // Collision between player and enemies
+    this.physics.add.collider(enemies, ground)
+    this.physics.add.collider(player, enemies, handleCollision, null, this);
 }
 
 function update() {
@@ -78,5 +91,55 @@ function update() {
     // Only reset the player's vertical velocity if they're not currently jumping
     if (player.body.touching.down && player.body.velocity.y > 0) {
         player.body.velocity.y = 0;
+    }
+
+        // Spawn enemies randomly
+        if (Math.random() < 0.005) { // Adjust spawn rate as needed
+            const x = config.width; 
+            const y = scale * 12;
+            enemies.add(new Enemy(this, x, y));
+        }
+    
+        // Update each enemy
+        Phaser.Actions.Call(enemies.getChildren(), function(enemy) {
+            enemy.update();
+        }, this);
+    
+}
+
+function handleCollision(player, enemy) {
+    if (player.body.touching.down && enemy.body.touching.up) {
+        // Player jumps on enemy
+        enemy.alive = false; // Mark the enemy as defeated
+    } else {
+        // Player collides with enemy side or bottom
+        player.alive = false;
+        // Handle player defeat (e.g., end game or restart)
+    }
+}
+
+
+class Enemy extends Phaser.Physics.Arcade.Sprite {
+    constructor(scene, x, y) {
+        super(scene, x, y, 'enemy'); // 'enemy' should be preloaded image key for enemy
+        scene.add.existing(this);
+        scene.physics.add.existing(this);
+        this.setCollideWorldBounds(false);
+        this.setVelocityX(-160); // Enemy moves towards the left; adjust speed as needed
+        this.alive = true;
+        this.setScale(0.1);
+    }
+
+    update() {
+        if (!this.alive) {
+            this.setVelocityX(0);
+            this.setVisible(false);
+            this.setActive(false);
+            this.body.destroy(); // Remove physics body
+        } else {
+            // Make enemy run towards player
+            let direction = this.scene.player.x - this.x;
+            this.setVelocityX(160 * Math.sign(direction)); // Adjust speed as needed
+        }
     }
 }
