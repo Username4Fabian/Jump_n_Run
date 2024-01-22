@@ -42,11 +42,11 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
             this.setActive(false);
             this.body.destroy();
         } else {
-            if (this.x < -this.width) {
+            if (this.x < -this.width || this.scene.player.x > this.scene.sys.game.config.width * 1.2) {
                 this.destroy();
             }
     
-            let offset = 80; 
+            let offset = 60; 
             let direction = (this.scene.player.x - offset) - this.x;
             let speed = 160; 
             let wherePlayer = Math.sign(direction);
@@ -125,6 +125,10 @@ class GameScene extends Phaser.Scene {
             runChildUpdate: true,
         });
 
+        this.score = 0;
+        this.scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+        this.frameCounter = 0;
+
         this.physics.add.collider(this.enemies, this.enemies);
         this.physics.add.collider(this.enemies, ground);
         this.physics.add.collider(this.player, this.enemies, this.handleCollision, null, this);
@@ -139,6 +143,12 @@ class GameScene extends Phaser.Scene {
             const y = this.background.scale * 12;
             this.enemies.add(new Enemy(this, x, y));
         }
+
+        this.frameCounter ++;
+        if (this.frameCounter % 20 === 0 && this.background.isScrolling) {
+            this.score += 1;
+            this.scoreText.setText('Score: ' + Math.floor(this.score));
+        }
     }
 
     handleCollision(player, enemy) {
@@ -146,8 +156,8 @@ class GameScene extends Phaser.Scene {
             enemy.alive = false;
         } else {
             player.alive = false;
-            console.log('Game Over!!!');
-            // Handle player defeat
+            this.scene.restart('GameScene');
+            return;
         }
     }
 }
