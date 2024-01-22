@@ -3,7 +3,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         super(scene, x, y, 'player');
         scene.add.existing(this);
         scene.physics.add.existing(this);
-        this.setBounce(0.2);
+        this.setBounce(0.08);
         this.setCollideWorldBounds(true);
         this.setScale(0.08);
         this.cursors = scene.input.keyboard.createCursorKeys();
@@ -41,11 +41,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
             this.setVisible(false);
             this.setActive(false);
             this.body.destroy();
-        } else {
-            if (this.x < -this.width || this.scene.player.x > this.scene.sys.game.config.width * 1.2) {
-                this.destroy();
-            }
-    
+        } else {    
             let offset = 60; 
             let direction = (this.scene.player.x - offset) - this.x;
             let speed = 160; 
@@ -139,7 +135,7 @@ class GameScene extends Phaser.Scene {
         this.background.update(this.player, this.cursors);
 
         if (Math.random() < 0.005) {
-            const x = this.sys.game.config.width * 1.2;
+            const x = this.sys.game.config.width * 1.3;
             const y = this.background.scale * 12;
             this.enemies.add(new Enemy(this, x, y));
         }
@@ -149,6 +145,11 @@ class GameScene extends Phaser.Scene {
             this.score += 1;
             this.scoreText.setText('Score: ' + Math.floor(this.score));
         }
+        this.enemies.children.iterate((enemy) => {
+            if (enemy.x < -10) {
+                enemy.alive = false;
+            }
+        });
     }
 
     handleCollision(player, enemy) {
