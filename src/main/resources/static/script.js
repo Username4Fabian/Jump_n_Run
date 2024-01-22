@@ -19,7 +19,7 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         }
 
         if (this.cursors.up.isDown && this.body.touching.down) {
-            this.setVelocityY(-700); // Jump
+            this.setVelocityY(-1000); // Jump
         }
     }
 }
@@ -42,16 +42,24 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
             this.setActive(false);
             this.body.destroy();
         } else {
-            if (this.scene.background.isScrolling) {
-                this.setVelocityX(-150); 
-            } else {
-                let direction = this.scene.player.x - this.x;
-                let speed = 160; 
-                this.setVelocityX(speed * Math.sign(direction));
-            }
-
             if (this.x < -this.width) {
                 this.destroy();
+            }
+    
+            let offset = 80; 
+            let direction = (this.scene.player.x - offset) - this.x;
+            let speed = 160; 
+            let wherePlayer = Math.sign(direction);
+    
+            if(!this.scene.background.isScrolling){
+                this.setVelocityX(speed * wherePlayer);
+
+            } else {
+                if(wherePlayer < 0){
+                    this.setVelocityX(speed * -2);
+                }else{
+                    this.setVelocityX((speed - 60) * -1);
+                }
             }
         }
     }
@@ -138,6 +146,7 @@ class GameScene extends Phaser.Scene {
             enemy.alive = false;
         } else {
             player.alive = false;
+            console.log('Game Over!!!');
             // Handle player defeat
         }
     }
@@ -150,7 +159,7 @@ const config = {
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 800 },
+            gravity: { y: 1500 },
             debug: false
         }
     },
