@@ -92,6 +92,22 @@ class Background {
     }
 }
 
+class Obstacle extends Phaser.Physics.Arcade.Sprite {
+    constructor(scene, x, y, texture, frame) {
+        super(scene, x, y, texture, frame);
+        scene.sys.updateList.add(this);
+        scene.sys.displayList.add(this);
+        scene.physics.world.enableBody(this);
+        this.setOrigin(0, 1);
+    }
+
+    update() {
+        if (this.x + this.width < 0) {
+            this.destroy();
+        }
+    }
+}
+
 class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene' });
@@ -101,6 +117,7 @@ class GameScene extends Phaser.Scene {
         this.load.image('background', 'images/background.png');
         this.load.image('player', 'images/player.png');
         this.load.image('enemy', 'images/enemy.png');
+        this.load.image('obstacle', 'images/obstacle.png');
     }
 
     create() {
@@ -113,21 +130,47 @@ class GameScene extends Phaser.Scene {
         let groundSprite = ground.create(this.background.scale, this.sys.game.config.height);
         groundSprite.setScale(200, this.background.scale * 12).refreshBody();
         groundSprite.setVisible(false);
-
         this.physics.add.collider(this.player, ground);
+
 
         this.enemies = this.physics.add.group({
             classType: Enemy,
             runChildUpdate: true,
+        });
+        this.physics.add.collider(this.enemies, this.enemies);
+        this.physics.add.collider(this.enemies, ground);
+        this.physics.add.collider(this.player, this.enemies, this.handleCollision, null, this);
+
+        this.obstacles = this.physics.add.group({
+            classType: Obstacle,
+            runChildUpdate: true,
+        });
+        
+        // Generate obstacles periodically
+        this.time.addEvent({
+            delay: Phaser.Math.Between(1000, 3000),
+            callback: function() {
+                let enemy = this.enemies.getChildren()[this.enemies.getChildren().length - 1];
+                const obstacleX = this.sys.game.config.width * 0.5;
+                const obstacleY = this.background.scale * 12 - 10;
+                let obstacle = new Obstacle(this, obstacleX, obstacleY, 'obstacle');
+                obstacle.setScale(1);
+                obstacle.setVelocityX(-200);
+                this.obstacles.add(obstacle);
+                console.log(this.obstacles);
+
+                this.physics.add.collider(this.player, obstacle);
+                this.physics.add.collider(obstacle, this.ground);
+            },
+            callbackScope: this,
+            loop: true
         });
 
         this.score = 0;
         this.scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
         this.frameCounter = 0;
 
-        this.physics.add.collider(this.enemies, this.enemies);
-        this.physics.add.collider(this.enemies, ground);
-        this.physics.add.collider(this.player, this.enemies, this.handleCollision, null, this);
+
     }
     
     update() {
