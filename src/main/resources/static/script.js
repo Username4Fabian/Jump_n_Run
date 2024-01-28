@@ -141,30 +141,41 @@ class GameScene extends Phaser.Scene {
         this.physics.add.collider(this.enemies, ground);
         this.physics.add.collider(this.player, this.enemies, this.handleCollision, null, this);
 
-        this.obstacles = this.physics.add.group({
-            classType: Obstacle,
-            runChildUpdate: true,
-        });
-        
-        // Generate obstacles periodically
-        this.time.addEvent({
-            delay: Phaser.Math.Between(1000, 3000),
-            callback: function() {
-                let enemy = this.enemies.getChildren()[this.enemies.getChildren().length - 1];
-                const obstacleX = this.sys.game.config.width * 0.5;
-                const obstacleY = this.background.scale * 12 - 10;
-                let obstacle = new Obstacle(this, obstacleX, obstacleY, 'obstacle');
-                obstacle.setScale(1);
-                obstacle.setVelocityX(-200);
-                this.obstacles.add(obstacle);
-                console.log(this.obstacles);
+this.obstacles = this.physics.add.group({
+    classType: Obstacle,
+    runChildUpdate: true,
+});
+
+// Generate obstacles periodically
+this.time.addEvent({
+    // Increase the delay to make obstacles occur less frequently
+    delay: Phaser.Math.Between(4000, 5000),
+    callback: function() {
+        let enemy = this.enemies.getChildren()[this.enemies.getChildren().length - 1];
+
+        const obstacleX = this.sys.game.config.width + 20;
+        const obstacleY = groundSprite.y - groundSprite.displayHeight / 2;
+
+        // Create a cluster of obstacles
+        for (let i = 0; i < Phaser.Math.Between(1, 5); i++) {
+            for (let j = 0; j < Phaser.Math.Between(1, 3); j++) {
+                let obstacle = this.obstacles.create(obstacleX + j * 60, obstacleY - i * 60, 'obstacle');
+                obstacle.initialX = obstacle.x;  // Store the initial X position
+                obstacle.setScale(0.8);
+
+                obstacle.body.immovable = true;
+                obstacle.body.allowGravity = false;
 
                 this.physics.add.collider(this.player, obstacle);
-                this.physics.add.collider(obstacle, this.ground);
-            },
-            callbackScope: this,
-            loop: true
-        });
+                this.physics.add.collider(obstacle, ground);
+            }
+        }
+    },
+    callbackScope: this,
+    loop: true
+});
+
+
 
         this.score = 0;
         this.scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
@@ -174,6 +185,15 @@ class GameScene extends Phaser.Scene {
     }
     
     update() {
+
+        this.obstacles.getChildren().forEach(obstacle => {
+            if (this.background.isScrolling) {
+                obstacle.setVelocityX(-277.7);
+            } else {
+                obstacle.setVelocityX(0);
+            }
+        });
+
         this.player.update();
         this.background.update(this.player, this.cursors);
 
