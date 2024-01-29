@@ -5,8 +5,9 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         scene.physics.add.existing(this);
         this.setBounce(0.08);
         this.setCollideWorldBounds(true);
-        this.setScale(0.08);
+        this.setScale(0.5);
         this.cursors = scene.input.keyboard.createCursorKeys();
+        this.anims.play('walk', true); 
     }
 
     update() {
@@ -82,7 +83,7 @@ class Background {
             } else {
                 this.isScrolling = true;
                 player.setVelocityX(0);
-                this.bg.tilePositionX += 10;
+                this.bg.tilePositionX += 11;
             }
         } else if (cursors.left.isDown) {
             player.setVelocityX(-300);
@@ -115,12 +116,22 @@ class GameScene extends Phaser.Scene {
 
     preload() {
         this.load.image('background', 'images/background.png');
-        this.load.image('player', 'images/player.png');
+        this.load.spritesheet('player', 'images/player.png', { frameWidth: 180, frameHeight: 192 });
         this.load.image('enemy', 'images/enemy.png');
         this.load.image('obstacle', 'images/obstacle.png');
+        this.load.image('playerIdle', 'images/idle.png');
+        this.load.image('playerJump', 'images/jump.png');
+        this.load.image('playerGameover', 'images/lose.png');
     }
 
     create() {
+        this.anims.create({
+            key: 'walk',
+            frames: this.anims.generateFrameNumbers('player', { start: 0, end: 2 }),
+            frameRate: 10,
+            repeat: -1
+        });
+
         this.background = new Background(this);
 
         this.player = new Player(this, 50, 500);
@@ -137,6 +148,7 @@ class GameScene extends Phaser.Scene {
             classType: Enemy,
             runChildUpdate: true,
         });
+
         this.physics.add.collider(this.enemies, this.enemies);
         this.physics.add.collider(this.enemies, ground);
         this.physics.add.collider(this.player, this.enemies, this.handleCollision, null, this);
@@ -162,12 +174,16 @@ this.time.addEvent({
                 let obstacle = this.obstacles.create(obstacleX + j * 60, obstacleY - i * 60, 'obstacle');
                 obstacle.initialX = obstacle.x;  // Store the initial X position
                 obstacle.setScale(0.8);
+                obstacle.immovable = true;
+
+                obstacle.setVelocityX(500);
 
                 obstacle.body.immovable = true;
                 obstacle.body.allowGravity = false;
 
                 this.physics.add.collider(this.player, obstacle);
                 this.physics.add.collider(obstacle, ground);
+                this.physics.add.collider(obstacle, this.enemies);
             }
         }
     },
@@ -185,16 +201,24 @@ this.time.addEvent({
     }
     
     update() {
-
-        this.obstacles.getChildren().forEach(obstacle => {
-            if (this.background.isScrolling) {
-                obstacle.setVelocityX(-277.7);
-            } else {
-                obstacle.setVelocityX(0);
-            }
-        });
-
         this.player.update();
+
+        if(this.player.body.touching.down && this.player.body.velocity.x === 0 && !this.background.isScrolling){
+            this.player.setTexture('playerIdle');
+        }else if(!this.player.body.touching.down){
+            this.player.setTexture('playerJump');
+        }
+
+        if(this.background.isScrolling){
+            this.obstacles.setVelocityX(-660);
+        }else{
+            this.obstacles.setVelocityX(-500);
+        }
+
+        if (this.player.x - this.player.body.width / 2 <= 0 && this.physics.overlap(this.player, this.obstacles)) {
+            this.handleCollision(this.player, null);
+        }
+
         this.background.update(this.player, this.cursors);
 
         if (Math.random() < 0.005) {
@@ -216,15 +240,24 @@ this.time.addEvent({
     }
 
     handleCollision(player, enemy) {
-        if (player.body.touching.down && enemy.body.touching.up) {
+        if (enemy !== null && player.body.touching.down && enemy.body.touching.up) {
             enemy.alive = false;
         } else {
+            this.player.setTexture('playerGameover');
             player.alive = false;
-            this.scene.restart('GameScene');
-            return;
+            player.body.setVelocity(0);
+            this.time.delayedCall(250, () => { // Wait for 100 milliseconds
+                this.scene.pause(); // Pause the game
+            });
+            setTimeout(() => {
+                this.scene.resume('GameScene');
+                this.scene.restart('GameScene');
+            }, 2000);
         }
     }
 }
+
+
 
 const config = {
     type: Phaser.AUTO,
