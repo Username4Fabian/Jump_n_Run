@@ -1,6 +1,10 @@
+let GLOBAL_SPEED = 320;
+let groundHeight = 0; 
+
 class Player extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y) {
         super(scene, x, y, 'player');
+        this.alive = true;
         scene.add.existing(this);
         scene.physics.add.existing(this);
         this.setBounce(0.08);
@@ -8,15 +12,24 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.setScale(0.5);
         this.cursors = scene.input.keyboard.createCursorKeys();
         this.anims.play('walk', true); 
+        this.isBackgroundScrolling = false;
     }
 
     update() {
+        // 160 is the speed of the player
         if (this.cursors.left.isDown) {
-            this.setVelocityX(-160);
+            this.setVelocityX(-GLOBAL_SPEED);
         } else if (this.cursors.right.isDown) {
-            this.setVelocityX(160);
+            this.setVelocityX(GLOBAL_SPEED);
         } else {
             this.setVelocityX(0);
+        }
+
+        // console.log(this.alive);
+        if(this.body.touching.down && this.body.velocity.x === 0 && !this.isBackgroundScrolling && this.alive){
+            this.setTexture('playerIdle');
+        }else if(!this.body.touching.down){
+            this.setTexture('playerJump');
         }
 
         if (this.cursors.up.isDown && this.body.touching.down) {
@@ -45,17 +58,16 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
         } else {    
             let offset = 60; 
             let direction = (this.scene.player.x - offset) - this.x;
-            let speed = 160; 
             let wherePlayer = Math.sign(direction);
     
             if(!this.scene.background.isScrolling){
-                this.setVelocityX(speed * wherePlayer);
+                this.setVelocityX(GLOBAL_SPEED * wherePlayer);
 
             } else {
                 if(wherePlayer < 0){
-                    this.setVelocityX(speed * -2);
+                    this.setVelocityX(GLOBAL_SPEED * -2);
                 }else{
-                    this.setVelocityX((speed - 60) * -1);
+                    this.setVelocityX((GLOBAL_SPEED - 60) * -1);
                 }
             }
         }
@@ -79,14 +91,16 @@ class Background {
         if (cursors.right.isDown) {
             if (player.x < this.scene.sys.game.config.width * 0.6) {
                 this.isScrolling = false;
-                player.setVelocityX(300);
+                player.backgroundScrolling = false;
+                player.setVelocityX(GLOBAL_SPEED*1.533333333333333);
             } else {
                 this.isScrolling = true;
+                player.backgroundScrolling = true;
                 player.setVelocityX(0);
-                this.bg.tilePositionX += 11;
+                this.bg.tilePositionX += GLOBAL_SPEED* 0.06875;
             }
         } else if (cursors.left.isDown) {
-            player.setVelocityX(-300);
+            player.setVelocityX(-GLOBAL_SPEED*1.533333333333333);
         } else {
             player.setVelocityX(0);
         }
@@ -143,15 +157,16 @@ class GameScene extends Phaser.Scene {
         groundSprite.setVisible(false);
         this.physics.add.collider(this.player, ground);
 
-
         this.enemies = this.physics.add.group({
             classType: Enemy,
             runChildUpdate: true,
         });
 
+        this.physics.add.collider(this.player, this.enemies, this.handleCollision, null, this);
         this.physics.add.collider(this.enemies, this.enemies);
         this.physics.add.collider(this.enemies, ground);
-        this.physics.add.collider(this.player, this.enemies, this.handleCollision, null, this);
+        this.physics.add.overlap(this.player, this.enemies, this.handleCollision, null, this);
+        // this.physics.add.collider(this.enemies, this.player, this.handleCollision, null, this);
 
 this.obstacles = this.physics.add.group({
     classType: Obstacle,
@@ -167,6 +182,7 @@ this.time.addEvent({
 
         const obstacleX = this.sys.game.config.width + 20;
         const obstacleY = groundSprite.y - groundSprite.displayHeight / 2;
+        groundHeight = obstacleY;
 
         // Create a cluster of obstacles
         for (let i = 0; i < Phaser.Math.Between(1, 5); i++) {
@@ -174,11 +190,10 @@ this.time.addEvent({
                 let obstacle = this.obstacles.create(obstacleX + j * 60, obstacleY - i * 60, 'obstacle');
                 obstacle.initialX = obstacle.x;  // Store the initial X position
                 obstacle.setScale(0.8);
-                obstacle.immovable = true;
+                obstacle.setImmovable(true);
 
                 obstacle.setVelocityX(500);
 
-                obstacle.body.immovable = true;
                 obstacle.body.allowGravity = false;
 
                 this.physics.add.collider(this.player, obstacle);
@@ -186,6 +201,7 @@ this.time.addEvent({
                 this.physics.add.collider(obstacle, this.enemies);
             }
         }
+
     },
     callbackScope: this,
     loop: true
@@ -203,27 +219,23 @@ this.time.addEvent({
     update() {
         this.player.update();
 
-        if(this.player.body.touching.down && this.player.body.velocity.x === 0 && !this.background.isScrolling){
-            this.player.setTexture('playerIdle');
-        }else if(!this.player.body.touching.down){
-            this.player.setTexture('playerJump');
-        }
-
         if(this.background.isScrolling){
-            this.obstacles.setVelocityX(-660);
+            this.obstacles.setVelocityX(-GLOBAL_SPEED*3.125);
         }else{
-            this.obstacles.setVelocityX(-500);
+            this.obstacles.setVelocityX(-GLOBAL_SPEED*2.125);
         }
 
-        if (this.player.x - this.player.body.width / 2 <= 0 && this.physics.overlap(this.player, this.obstacles)) {
-            this.handleCollision(this.player, null);
-        }
+        this.obstacles.children.iterate(function(obstacle) {
+            if ((this.player.x - this.player.body.width / 2 <= 0.1) && this.player.body.touching.right && obstacle.body.touching.left) {
+                this.handleCollision(this.player, null);
+            }
+        }, this);
 
         this.background.update(this.player, this.cursors);
 
         if (Math.random() < 0.005) {
             const x = this.sys.game.config.width * 1.3;
-            const y = this.background.scale * 12;
+            const y = groundHeight; // AHHHHHHH
             this.enemies.add(new Enemy(this, x, y));
         }
 
@@ -232,6 +244,11 @@ this.time.addEvent({
             this.score += 1;
             this.scoreText.setText('Score: ' + Math.floor(this.score));
         }
+
+        if (this.frameCounter % 10 === 0) {
+            GLOBAL_SPEED = GLOBAL_SPEED* 1.0005;
+        }
+
         this.enemies.children.iterate((enemy) => {
             if (enemy.x < -10) {
                 enemy.alive = false;
@@ -240,19 +257,28 @@ this.time.addEvent({
     }
 
     handleCollision(player, enemy) {
+        console.log("Collision");
         if (enemy !== null && player.body.touching.down && enemy.body.touching.up) {
+            this.score += 10;
+            this.scoreText.setText('Score: ' + Math.floor(this.score));
             enemy.alive = false;
         } else {
-            this.player.setTexture('playerGameover');
+            GLOBAL_SPEED = 320;
+            this.physics.pause();
             player.alive = false;
+            this.player.setTexture('playerGameover');
+            console.log("Game Over texture set");
+            this.player.update();
             player.body.setVelocity(0);
-            this.time.delayedCall(250, () => { // Wait for 100 milliseconds
-                this.scene.pause(); // Pause the game
+            this.time.delayedCall(250, () => { 
+                player.alive = false;
+                this.scene.pause(); 
             });
             setTimeout(() => {
+                console.log("Restarting");
                 this.scene.resume('GameScene');
                 this.scene.restart('GameScene');
-            }, 2000);
+            }, 1);
         }
     }
 }
