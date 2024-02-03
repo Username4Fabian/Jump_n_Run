@@ -61,8 +61,8 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
             let wherePlayer = Math.sign(direction);
     
             if(!this.scene.background.isScrolling){
+                console.log("Not scrolling");
                 this.setVelocityX(GLOBAL_SPEED * wherePlayer);
-
             } else {
                 if(wherePlayer < 0){
                     this.setVelocityX(GLOBAL_SPEED * -2);
@@ -163,7 +163,7 @@ class GameScene extends Phaser.Scene {
         });
 
         this.physics.add.collider(this.player, this.enemies, this.handleCollision, null, this);
-        this.physics.add.collider(this.enemies, this.enemies);
+        // this.physics.add.collider(this.enemies, this.enemies);
         this.physics.add.collider(this.enemies, ground);
         this.physics.add.overlap(this.player, this.enemies, this.handleCollision, null, this);
         // this.physics.add.collider(this.enemies, this.player, this.handleCollision, null, this);
@@ -176,7 +176,7 @@ this.obstacles = this.physics.add.group({
 // Generate obstacles periodically
 this.time.addEvent({
     // Increase the delay to make obstacles occur less frequently
-    delay: Phaser.Math.Between(4000, 5000),
+    delay: Phaser.Math.Between(4000, 5000) / (GLOBAL_SPEED / 320),
     callback: function() {
         let enemy = this.enemies.getChildren()[this.enemies.getChildren().length - 1];
 
@@ -233,9 +233,10 @@ this.time.addEvent({
 
         this.background.update(this.player, this.cursors);
 
-        if (Math.random() < 0.005) {
+        let enemyProbability = (GLOBAL_SPEED/320) * 0.009;  
+        if (Math.random() < enemyProbability) {
             const x = this.sys.game.config.width * 1.3;
-            const y = groundHeight; // AHHHHHHH
+            const y = groundHeight* this.background.scale; 
             this.enemies.add(new Enemy(this, x, y));
         }
 
@@ -245,13 +246,15 @@ this.time.addEvent({
             this.scoreText.setText('Score: ' + Math.floor(this.score));
         }
 
-        if (this.frameCounter % 10 === 0) {
+        if (this.frameCounter % 10 === 0 && GLOBAL_SPEED < 1000) {
             GLOBAL_SPEED = GLOBAL_SPEED* 1.0005;
         }
+        console.log(GLOBAL_SPEED);
 
         this.enemies.children.iterate((enemy) => {
-            if (enemy.x < -10) {
+            if (enemy && enemy.x < -10) {
                 enemy.alive = false;
+                enemy.destroy();
             }
         });
     }
