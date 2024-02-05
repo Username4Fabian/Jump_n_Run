@@ -28,12 +28,12 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         // console.log(this.alive);
         if(this.body.touching.down && this.body.velocity.x === 0 && !this.isBackgroundScrolling && this.alive){
             this.setTexture('playerIdle');
-        }else if(!this.body.touching.down){
+        }else if(!this.body.touching.down && this.alive){
             this.setTexture('playerJump');
         }
 
         if (this.cursors.up.isDown && this.body.touching.down) {
-            this.setVelocityY(-1000); // Jump
+            this.setVelocityY(-1500); // Jump
         }
     }
 }
@@ -43,6 +43,20 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
         super(scene, x, y, 'enemy');
         scene.add.existing(this);
         scene.physics.add.existing(this);
+
+        // Get the current width of the sprite
+        const currentWidth = this.displayWidth;
+        const currentHeight = this.displayHeight;
+
+        // Reduce the width by 20% to make it 10% smaller on each side
+        const newWidth = currentWidth * 0.8;
+
+        // Set the new size of the hitbox
+        this.body.setSize(newWidth, currentHeight);
+
+        // Set the offset to center the hitbox
+        this.body.setOffset((currentWidth - newWidth) / 2, 0);
+
         this.setCollideWorldBounds(false);
         this.setVelocityX(0);
         this.alive = true;
@@ -61,7 +75,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
             let wherePlayer = Math.sign(direction);
     
             if(!this.scene.background.isScrolling){
-                console.log("Not scrolling");
+                // console.log("Not scrolling");
                 this.setVelocityX(GLOBAL_SPEED * wherePlayer);
             } else {
                 if(wherePlayer < 0){
@@ -192,7 +206,7 @@ this.time.addEvent({
                 obstacle.setScale(0.8);
                 obstacle.setImmovable(true);
 
-                obstacle.setVelocityX(500);
+                obstacle.setVelocityX(GLOBAL_SPEED * 1.64);
 
                 obstacle.body.allowGravity = false;
 
@@ -249,7 +263,7 @@ this.time.addEvent({
         if (this.frameCounter % 10 === 0 && GLOBAL_SPEED < 1000) {
             GLOBAL_SPEED = GLOBAL_SPEED* 1.0005;
         }
-        console.log(GLOBAL_SPEED);
+        // console.log(GLOBAL_SPEED);
 
         this.enemies.children.iterate((enemy) => {
             if (enemy && enemy.x < -10) {
@@ -295,7 +309,7 @@ const config = {
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 1500 },
+            gravity: { y: 3000 },
             debug: false
         }
     },
