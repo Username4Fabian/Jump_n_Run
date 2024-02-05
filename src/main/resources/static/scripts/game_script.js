@@ -143,13 +143,13 @@ class GameScene extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('background', 'images/background.png');
-        this.load.spritesheet('player', 'images/player.png', { frameWidth: 180, frameHeight: 192 });
-        this.load.image('enemy', 'images/enemy.png');
-        this.load.image('obstacle', 'images/obstacle.png');
-        this.load.image('playerIdle', 'images/idle.png');
-        this.load.image('playerJump', 'images/jump.png');
-        this.load.image('playerGameover', 'images/lose.png');
+        this.load.image('background', 'images/game/background.png');
+        this.load.spritesheet('player', 'images/game/player.png', { frameWidth: 180, frameHeight: 192 });
+        this.load.image('enemy', 'images/game/enemy.png');
+        this.load.image('obstacle', 'images/game/obstacle.png');
+        this.load.image('playerIdle', 'images/game/idle.png');
+        this.load.image('playerJump', 'images/game/jump.png');
+        this.load.image('playerGameover', 'images/game/lose.png');
     }
 
     create() {
