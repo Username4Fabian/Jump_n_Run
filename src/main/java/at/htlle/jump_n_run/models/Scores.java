@@ -2,7 +2,15 @@ package at.htlle.jump_n_run.models;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Scores {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long ID;
     private LocalDate date;
     private int score;
