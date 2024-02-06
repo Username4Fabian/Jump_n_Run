@@ -22,9 +22,14 @@ public class PlayerController {
     private ScoreRepository scoreRepository;
 
     @PostMapping("/createPlayer")
-    public ResponseEntity<String> createPlayer(@RequestParam String name, @RequestParam String password) {
-        if(playerRepository.findByName(name) != null) {
-            return new ResponseEntity<>("Username already taken", HttpStatus.BAD_REQUEST);
+    public ResponseEntity<Object> createPlayer(@RequestParam String name, @RequestParam String password) {
+        Player existingPlayer = playerRepository.findByName(name);
+        if(existingPlayer != null) {
+            if(existingPlayer.getPassword().equals(password)) {
+                return new ResponseEntity<>(existingPlayer.getName(), HttpStatus.CONFLICT);
+            } else {
+                return new ResponseEntity<>("Username already taken", HttpStatus.BAD_REQUEST);
+            }
         }
         Player player = new Player();
         player.setName(name);
@@ -33,7 +38,7 @@ public class PlayerController {
         player.setHighscore(0);
         player.setTotalPlaytime(java.sql.Time.valueOf("00:00:00"));
         playerRepository.save(player);
-
+    
         return new ResponseEntity<>("Player created", HttpStatus.OK);
     }
 

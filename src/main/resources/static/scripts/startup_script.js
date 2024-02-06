@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', initialize);
 function initialize() {
     const form = document.querySelector('.login-form');
     form.addEventListener('submit', handleFormSubmit);
+
+    const incorrect = document.getElementById('incorrect');
+    incorrect.textContent = '';
 }
 
 function handleFormSubmit(e) {
@@ -27,19 +30,25 @@ function makeRequest(url) {
 }
 
 function handleResponse(response) {
+    const contentType = response.headers.get('content-type');
     if (response.status === 400) {
         return response.text();
-    } else if (!response.ok) {
-        throw new Error('Network response was not ok');
+    } else if (response.status === 409 && contentType && contentType.includes('application/json')) {
+        return response.json(); 
     }
     return response.text(); 
 }
 
 function handleData(data) {
-    if (data.includes('Username already taken')) {
+    if (typeof data === 'string' && data.includes('Username already taken')) {
+        incorrect.textContent = 'The password is incorrect or the username already exists!!!';
         console.log('Error:', data); 
+    } else if (typeof data === 'object' && data.username) {
+        console.log('Success:', data);
+        window.location.href = `game.html?username=${data.username}`;
     } else {
         console.log('Success:', data);
+        window.location.href = `game.html?username=${document.getElementById('username').value}`;
     }
 }
 

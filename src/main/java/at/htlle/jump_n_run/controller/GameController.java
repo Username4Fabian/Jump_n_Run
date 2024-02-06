@@ -8,8 +8,10 @@ import at.htlle.jump_n_run.repositories.ScoreRepository;
 
 @RestController
 public class GameController {
+    @SuppressWarnings("unused")
     @Autowired
     private PlayerRepository playerRepository;
+    @SuppressWarnings("unused")
     @Autowired
     private ScoreRepository scoreRepository;
     

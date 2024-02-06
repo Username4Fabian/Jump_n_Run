@@ -41,6 +41,7 @@ body{
     text-align: center;
     font-family: 'PressStart2P', sans-serif;
     line-height: 1.5;
+    margin-bottom: 2%;
 }
 
 .input-group {
@@ -79,6 +80,7 @@ body{
 button {
     display: block;
     margin: auto;
+    margin-top: 2%;
     padding: 50px;
     background-image: url('../images/startup/star.png');
     background-size: cover;
@@ -107,6 +109,8 @@ button:hover {
     margin-top: 60px;
 }
 
-
-
+#incorrect {
+    position: relative;
+    top: -20px;
+}
 
