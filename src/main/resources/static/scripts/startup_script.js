@@ -1,5 +1,20 @@
 document.addEventListener('DOMContentLoaded', initialize);
 
+if(getCookie('user') !== null) {
+    window.location.href = `game.html`;
+}
+
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
 function initialize() {
     const form = document.querySelector('.login-form');
     form.addEventListener('submit', handleFormSubmit);
@@ -48,11 +63,41 @@ function handleData(data) {
         window.location.href = `game.html?username=${data.username}`;
     } else {
         console.log('Success:', data);
-        window.location.href = `game.html?username=${document.getElementById('username').value}`;
+        var user = document.getElementById('username').value;
+        fetchToken(user);
+        setCookie('user', user, 240);
+        window.location.href = `game.html`;
     }
+}
+
+function setCookie(name, value, minutes) {
+    var expires = "";
+    if (minutes) {
+        var date = new Date();
+        date.setTime(date.getTime() + (minutes * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
 }
 
 function handleError(error) {
     console.error('Error:', error);
     alert(error); 
+}
+
+async function fetchToken(userName) {
+    try {
+        const response = await fetch('/getToken?userName=' + encodeURIComponent(userName), {
+            method: 'GET'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const token = await response.text();
+        console.log('Token:', token);
+    } catch (error) {
+        console.error('Error:', error);
+    }
 }

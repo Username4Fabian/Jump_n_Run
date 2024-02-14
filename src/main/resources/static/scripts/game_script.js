@@ -1,5 +1,31 @@
 let GLOBAL_SPEED = 320;
 let groundHeight = 0; 
+const userName = getCookie('user');
+const token = getToken(userName)
+.then(token => console.log(token))
+.catch(error => console.error(error));
+
+function getCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
+// Not working!
+async function getToken(userName) {
+    const response = await fetch(`/getToken?userName=${userName}`);
+    if (!response.ok) {
+        const message = `An error has occurred: ${response.status}`;
+        throw new Error(message);
+    }
+    const token = await response.text();
+    return token;
+} 
 
 class Player extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y) {
