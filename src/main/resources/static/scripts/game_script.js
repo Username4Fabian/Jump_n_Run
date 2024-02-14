@@ -172,6 +172,7 @@ class GameScene extends Phaser.Scene {
         this.load.image('playerJump', 'images/game/jump.png');
         this.load.image('playerGameover', 'images/game/lose.png');
         this.load.image('logoutButton', 'images/game/logoutButton.png');
+        this.load.image('ScoreBoard', 'images/game/ScoreBoard_Button.png');
     }
 
     create() {
