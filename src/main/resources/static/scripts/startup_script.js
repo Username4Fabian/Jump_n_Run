@@ -1,7 +1,15 @@
 document.addEventListener('DOMContentLoaded', initialize);
 
 if(getCookie('user') !== null) {
-    window.location.href = `game.html`;
+    var user = getCookie('user');
+    setCookie('user', user, 240);
+
+    getToken(user).then(token => {
+        setCookie('token', token, 240);
+        window.location.href = `game.html`;
+    }).catch(error => {
+        console.error('Error:', error);
+    });
 }
 
 function getCookie(name) {
@@ -14,6 +22,33 @@ function getCookie(name) {
     }
     return null;
 }
+
+function setCookie(name, value, minutes) {
+    var expires = "";
+    if (minutes) {
+        var date = new Date();
+        date.setTime(date.getTime() + (minutes * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+}
+
+async function getToken(userName) {
+    try {
+        const response = await fetch(`http://localhost:8080/getToken?userName=${userName}`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const token = await response.text();
+        return token;
+    } catch (error) {
+        console.error('Error fetching token:', error);
+        throw error;  // Re-throw the error to be handled by the caller
+    }
+}
+
 
 function initialize() {
     const form = document.querySelector('.login-form');
@@ -64,40 +99,17 @@ function handleData(data) {
     } else {
         console.log('Success:', data);
         var user = document.getElementById('username').value;
-        fetchToken(user);
-        setCookie('user', user, 240);
-        window.location.href = `game.html`;
+        getToken(user).then(token => {
+            setCookie('token', token, 240);
+            setCookie('user', user, 240);
+            window.location.href = `game.html`;
+        }).catch(error => {
+            console.error('Error:', error);
+        });
     }
-}
-
-function setCookie(name, value, minutes) {
-    var expires = "";
-    if (minutes) {
-        var date = new Date();
-        date.setTime(date.getTime() + (minutes * 60 * 1000));
-        expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
 }
 
 function handleError(error) {
     console.error('Error:', error);
     alert(error); 
-}
-
-async function fetchToken(userName) {
-    try {
-        const response = await fetch('/getToken?userName=' + encodeURIComponent(userName), {
-            method: 'GET'
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const token = await response.text();
-        console.log('Token:', token);
-    } catch (error) {
-        console.error('Error:', error);
-    }
 }
