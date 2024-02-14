@@ -54,7 +54,7 @@ public class PlayerController {
     public ResponseEntity<String> getMethodName(@RequestParam String userName) {
         String token = TokenService.generateToken(userName);
         if(validateToken(token)) {
-            System.out.println("Token: " + token);
+            // System.out.println("Token: " + token);
             return ResponseEntity.ok(token);
         } else {
             return ResponseEntity.status(500).body("Token error");

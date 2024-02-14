@@ -163,6 +163,7 @@ class GameScene extends Phaser.Scene {
         this.load.image('playerIdle', 'images/game/idle.png');
         this.load.image('playerJump', 'images/game/jump.png');
         this.load.image('playerGameover', 'images/game/lose.png');
+        this.load.image('logoutButton', 'images/game/logoutButton.png');
     }
 
     create() {
@@ -194,6 +195,16 @@ class GameScene extends Phaser.Scene {
         this.physics.add.collider(this.enemies, ground);
         this.physics.add.overlap(this.player, this.enemies, this.handleCollision, null, this);
         // this.physics.add.collider(this.enemies, this.player, this.handleCollision, null, this);
+
+        let logoutButton = this.add.image(this.sys.game.config.width - 50, 50 , 'logoutButton').setInteractive();
+        logoutButton.scale = 0.7;
+
+        logoutButton.on('pointerdown', () => {
+            console.log("Logging out");
+            document.cookie = 'user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            window.location.href = 'index.html';
+        });
 
 this.obstacles = this.physics.add.group({
     classType: Obstacle,
