@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 public class GameController {
-    @SuppressWarnings("unused")
     @Autowired
     private PlayerRepository playerRepository;
     @Autowired
