@@ -1,7 +1,15 @@
 let GLOBAL_SPEED = 320;
 let groundHeight = 0; 
 const userName = getCookie('user');
-const token = 0;
+const token = getCookie('token');
+
+let startTime = null; 
+let timeSinceStart = 0;
+
+if (userName == null || token == null) {
+    window.location.href = `index.html`;
+}
+
 
 function getCookie(name) {
     var nameEQ = name + "=";
@@ -245,8 +253,7 @@ this.time.addEvent({
     loop: true
 });
 
-
-
+        this.startTime = null; 
         this.score = 0;
         this.scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
         this.frameCounter = 0;
@@ -255,6 +262,12 @@ this.time.addEvent({
     }
     
     update() {
+
+        if(this.score == 0){
+            timeSinceStart = 0;
+            startTime = new Date();
+        }
+
         this.player.update();
 
         if(this.background.isScrolling){
@@ -304,6 +317,10 @@ this.time.addEvent({
             this.scoreText.setText('Score: ' + Math.floor(this.score));
             enemy.alive = false;
         } else {
+            updateTimeSinceStart();
+            createScore(this.score, 1, timeSinceStart, userName);
+            console.log(timeSinceStart);
+
             GLOBAL_SPEED = 320;
             this.physics.pause();
             player.alive = false;
@@ -324,7 +341,35 @@ this.time.addEvent({
     }
 }
 
+function updateTimeSinceStart() {
+    if (startTime !== null) {
+        const currentTime = new Date();
+        timeSinceStart = currentTime - startTime;
+    }
+}
 
+function createScore(score, level, playtime, name) {
+    const url = 'http://localhost:8080/createScore';
+    const data = {
+        score: score,
+        level: level,
+        playtime: playtime,
+        name: name
+    };
+
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.text())
+    .then(data => console.log(data))
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
 
 const config = {
     type: Phaser.AUTO,

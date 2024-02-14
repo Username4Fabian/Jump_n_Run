@@ -5,15 +5,6 @@ import java.util.Date;
 
 
 public class TokenService {
-
-    /*
-    public static void main(String[] args) {
-        TokenService tokenService = new TokenService();
-        String token = TokenService.generateToken("admin");
-        System.out.println("Token: " + token);
-        System.out.println("Valid token: " + tokenService.validateToken(token));
-    } */
-
     private static String secretKey = "VerySecretKey";
 
     public static String generateToken(String username) {

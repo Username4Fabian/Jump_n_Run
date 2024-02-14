@@ -1,5 +1,4 @@
 package at.htlle.jump_n_run.models;
-import java.sql.Time;
 import java.time.LocalDate;
 
 import jakarta.persistence.Entity;
@@ -16,12 +15,12 @@ public class Player {
     private int Highscore; 
     private LocalDate creationDate; 
     private String password;
-    private Time totalPlaytime;
+    private Long totalPlaytime;
 
     public Player() {
     }
 
-    public Player(Long ID, String name, int Highscore, LocalDate creationDate, String password, Time totalPlaytime) {
+    public Player(Long ID, String name, int Highscore, LocalDate creationDate, String password, Long totalPlaytime) {
         this.ID = ID;
         this.name = name;
         this.Highscore = Highscore;
@@ -70,11 +69,11 @@ public class Player {
         this.password = password;
     }
 
-    public Time getTotalPlaytime() {
+    public Long getTotalPlaytime() {
         return this.totalPlaytime;
     }
 
-    public void setTotalPlaytime(Time totalPlaytime) {
+    public void setTotalPlaytime(Long totalPlaytime) {
         this.totalPlaytime = totalPlaytime;
     }
 

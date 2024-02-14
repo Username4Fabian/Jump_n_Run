@@ -1,33 +1,37 @@
 package at.htlle.jump_n_run.models;
-
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 public class Scores {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long ID;
-    private LocalDate date;
+    private LocalDateTime date;
     private int score;
     private int level; 
-    private int playtime;
-    private Long player_ID; 
+    private Long playtime;
+
+    @ManyToOne
+    @JoinColumn(name = "player_id", nullable = false)
+    private Player player;
 
     public Scores() {
     }
 
-    public Scores(Long ID, LocalDate date, int score, int level, int playtime, Long player_ID) {
+    public Scores(Long ID, LocalDateTime date, int score, int level, Long playtime, Player player) {
         this.ID = ID;
         this.date = date;
         this.score = score;
         this.level = level;
         this.playtime = playtime;
-        this.player_ID = player_ID;
+        this.player = player;
     }
 
 
@@ -39,11 +43,11 @@ public class Scores {
         this.ID = ID;
     }
 
-    public LocalDate getDate() {
+    public LocalDateTime getDate() {
         return this.date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(LocalDateTime date) {
         this.date = date;
     }
 
@@ -63,21 +67,22 @@ public class Scores {
         this.level = level;
     }
 
-    public int getPlaytime() {
+    public Long getPlaytime() {
         return this.playtime;
     }
 
-    public void setPlaytime(int playtime) {
+    public void setPlaytime(Long playtime) {
         this.playtime = playtime;
     }
 
-    public Long getPlayer_ID() {
-        return this.player_ID;
+    public Player getPlayer() {
+        return this.player;
     }
 
-    public void setPlayer_ID(Long player_ID) {
-        this.player_ID = player_ID;
+    public void setPlayer(Player player) {
+        this.player = player;
     }
+
 
     
 }

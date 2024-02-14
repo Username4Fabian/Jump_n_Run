@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import at.htlle.jump_n_run.models.Player;
 import at.htlle.jump_n_run.repositories.PlayerRepository;
-import at.htlle.jump_n_run.repositories.ScoreRepository;
 import at.htlle.jump_n_run.service.TokenService;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,9 +20,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class PlayerController {
     @Autowired
     private PlayerRepository playerRepository;
-    @Autowired
-    @SuppressWarnings("unused")
-    private ScoreRepository scoreRepository;
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -44,7 +40,7 @@ public class PlayerController {
         player.setPassword(bCryptPasswordEncoder.encode(password));
         player.setCreationDate(LocalDate.now());
         player.setHighscore(0);
-        player.setTotalPlaytime(java.sql.Time.valueOf("00:00:00"));
+        player.setTotalPlaytime((long) 0);
         playerRepository.save(player);
     
         return new ResponseEntity<>("Player created", HttpStatus.OK);
@@ -54,7 +50,6 @@ public class PlayerController {
     public ResponseEntity<String> getMethodName(@RequestParam String userName) {
         String token = TokenService.generateToken(userName);
         if(validateToken(token)) {
-            // System.out.println("Token: " + token);
             return ResponseEntity.ok(token);
         } else {
             return ResponseEntity.status(500).body("Token error");
