@@ -37,6 +37,10 @@ public class GameController {
         score.setScore(request.getScore());
         score.setLevel(request.getLevel());
         score.setPlaytime(request.getPlaytime());
+
+        if(score.getScore() <= 0){
+            return "Score must be greater than 0";
+        }
     
         Player player = playerRepository.findByName(request.getName());
         if (player == null) {

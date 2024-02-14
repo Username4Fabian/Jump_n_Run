@@ -208,11 +208,19 @@ class GameScene extends Phaser.Scene {
         let logoutButton = this.add.image(this.sys.game.config.width - 50, 50 , 'logoutButton').setInteractive();
         logoutButton.scale = 0.7;
 
+        let scoreBoard = this.add.image(this.sys.game.config.width - logoutButton.height - 50, 50 , 'ScoreBoard').setInteractive();
+        scoreBoard.scale = 0.7;
+
         logoutButton.on('pointerdown', () => {
             console.log("Logging out");
             document.cookie = 'user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
             document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
             window.location.href = 'index.html';
+        });
+
+        scoreBoard.on('pointerdown', () => {
+            console.log("Open Scoreboard");
+            window.location.href = 'scoreboard.html';
         });
 
 this.obstacles = this.physics.add.group({
