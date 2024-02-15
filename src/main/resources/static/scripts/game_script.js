@@ -319,19 +319,19 @@ this.time.addEvent({
         });
     }
 
-    handleCollision(player, enemy) {
+handleCollision(player, enemy) {
         console.log("Collision");
         if (enemy !== null && player.body.touching.down && enemy.body.touching.up) {
             this.score += 10;
             this.scoreText.setText('Score: ' + Math.floor(this.score));
             enemy.alive = false;
         } else {
+            this.physics.pause();
             updateTimeSinceStart();
             createScore(this.score, 1, timeSinceStart, userName);
             console.log(timeSinceStart);
 
             GLOBAL_SPEED = 320;
-            this.physics.pause();
             player.alive = false;
             this.player.setTexture('playerGameover');
             console.log("Game Over texture set");
