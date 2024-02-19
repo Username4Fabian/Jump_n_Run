@@ -12,7 +12,7 @@ public class Player {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long ID; 
     private String name;
-    private int Highscore; 
+    private int highscore; 
     private LocalDate creationDate; 
     private String password;
     private Long totalPlaytime;
@@ -20,10 +20,10 @@ public class Player {
     public Player() {
     }
 
-    public Player(Long ID, String name, int Highscore, LocalDate creationDate, String password, Long totalPlaytime) {
+    public Player(Long ID, String name, int highscore, LocalDate creationDate, String password, Long totalPlaytime) {
         this.ID = ID;
         this.name = name;
-        this.Highscore = Highscore;
+        this.highscore = highscore;
         this.creationDate = creationDate;
         this.password = password;
         this.totalPlaytime = totalPlaytime;
@@ -46,11 +46,11 @@ public class Player {
     }
 
     public int getHighscore() {
-        return this.Highscore;
+        return this.highscore;
     }
 
-    public void setHighscore(int Highscore) {
-        this.Highscore = Highscore;
+    public void setHighscore(int highscore) {
+        this.highscore = highscore;
     }
 
     public LocalDate getCreationDate() {

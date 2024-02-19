@@ -1,5 +1,6 @@
 package at.htlle.jump_n_run.controller;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,7 @@ import at.htlle.jump_n_run.repositories.ScoreRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 
@@ -31,6 +33,16 @@ public class GameController {
 
     @PostMapping("/createScore")
     public String createScore(@RequestBody ScoreRequest request) {
+        Player player = playerRepository.findByName(request.getName());
+        if (player == null) {
+            return "Player not found";
+        }
+
+        Scores lastScore = scoreRepository.findTopByPlayerOrderByDateDesc(player);
+        if (lastScore != null && ChronoUnit.SECONDS.between(lastScore.getDate(), LocalDateTime.now()) <= 1) {
+            return "Score not saved, previous score was less than 1 second ago";
+        }
+
         Scores score = new Scores();
         score.setDate(LocalDateTime.now());
         score.setScore(request.getScore());
@@ -40,24 +52,35 @@ public class GameController {
         if(score.getScore() <= 0){
             return "Score must be greater than 0";
         }
-    
-        Player player = playerRepository.findByName(request.getName());
-        if (player == null) {
-            return "Player not found";
-        }
-    
+
         score.setPlayer(player);
         scoreRepository.save(score);
 
         updateTotalPlaytime(score, player);
         updateHighscore(score, player);
-    
+
         return "Score created";
     }
 
+    @GetMapping("/getPlayerList")
+    public List<Map<String, Object>> getPlayerList() {
+        List<Player> players = playerRepository.findAll(Sort.by(Sort.Direction.DESC, "highscore"));
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (Player player : players) {
+            Map<String, Object> playerMap = new HashMap<>();
+            playerMap.put("name", player.getName());
+            playerMap.put("score", player.getHighscore());
+            playerMap.put("playtime", player.getTotalPlaytime());
+            playerMap.put("date", player.getCreationDate());
+            result.add(playerMap);
+        }
+        return result;
+    }
+
     @GetMapping("/getScores")
-    public List<Map<String, Object>> getScores() {
-        List<Scores> scores = scoreRepository.findAll(Sort.by(Sort.Direction.DESC, "score"));
+    public List<Map<String, Object>> getScores(@RequestParam String name) {
+        List<Scores> scores = scoreRepository.findByPlayerName(name, Sort.by(Sort.Direction.DESC, "score"));
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (Scores score : scores) {

@@ -29,11 +29,21 @@ th, td {
     text-align: center;
 }
 
-th {
-    font-size: 30px;
+table tr:first-child td {
+    font-size: 25px;
 }
+
 td {
     font-size: 15px;
+}
+
+table tr:not(:first-child) td {
+    transition: all 0.3s ease; 
+}
+
+table tr:not(:first-child) td:hover {
+    cursor: pointer;
+
 }
 
 body {
@@ -42,5 +52,15 @@ body {
     height: 100%;
     background-size: cover;
     align-items: center;
+}
+
+#back {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 2%;
+    opacity: 0.9;
+    width: 10%;
+
 }
 
