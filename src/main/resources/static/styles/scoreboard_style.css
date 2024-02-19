@@ -64,3 +64,8 @@ body {
 
 }
 
+.table-container {
+    max-height: 60vh;
+    overflow: auto;
+  }
+
