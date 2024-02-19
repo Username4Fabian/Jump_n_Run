@@ -23,6 +23,8 @@ public class PlayerController {
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    public static Boolean tokenisValid = false;
+
     @PostMapping("/createPlayer")
     public ResponseEntity<Object> createPlayer(@RequestParam String name, @RequestParam String password) {
         Player existingPlayer = playerRepository.findByName(name);
@@ -55,6 +57,18 @@ public class PlayerController {
             return ResponseEntity.status(500).body("Token error");
         }
     }
+
+/*
+    @GetMapping("/validateToken")
+    public ResponseEntity<String> validateTokenReq(@RequestParam String token) {
+        if(TokenService.validateToken(token)) {
+            tokenisValid = true;
+            return ResponseEntity.ok("Token is valid");
+        } else {
+            tokenisValid = false;
+            return ResponseEntity.status(500).body("Token is invalid");
+        }
+    } */
     
     private static boolean validateToken(String token) {
         return TokenService.validateToken(token);
