@@ -11,7 +11,7 @@ import jakarta.persistence.ManyToOne;
 @Entity
 public class Scores {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long ID;
     private LocalDateTime date;
     private int score;

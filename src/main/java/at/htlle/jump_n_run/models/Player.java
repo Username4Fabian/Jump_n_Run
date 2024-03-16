@@ -9,7 +9,7 @@ import jakarta.persistence.Id;
 @Entity
 public class Player {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // IDENTITY für Reihenfolge
     private Long ID; 
     private String name;
     private int highscore; 
