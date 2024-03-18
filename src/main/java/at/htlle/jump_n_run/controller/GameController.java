@@ -105,7 +105,7 @@ public class GameController {
 
     private void updateTotalPlaytime(Scores score, Player player){
         Long newPlaytime = player.getTotalPlaytime() + score.getPlaytime();
-        player.setTotalPlaytime(newPlaytime + score.getPlaytime());
+        player.setTotalPlaytime(newPlaytime);
         playerRepository.save(player);
     }
 }
