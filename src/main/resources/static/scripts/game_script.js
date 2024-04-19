@@ -90,6 +90,7 @@ class Enemy extends Phaser.Physics.Arcade.Sprite {
             this.setVisible(false);
             this.setActive(false);
             this.body.destroy();
+            
         } else {    
             let offset = 60; 
             let direction = (this.scene.player.x - offset) - this.x;
@@ -322,6 +323,7 @@ this.time.addEvent({
 handleCollision(player, enemy) {
         console.log("Collision");
         if (enemy !== null && player.body.touching.down && enemy.body.touching.up) {
+            player.body.velocity.y = -400;
             this.score += 10;
             this.scoreText.setText('Score: ' + Math.floor(this.score));
             enemy.alive = false;
