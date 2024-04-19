@@ -35,7 +35,7 @@ function setCookie(name, value, minutes) {
 
 async function getToken(userName) {
     try {
-        const response = await fetch(`http://localhost:8080/getToken?userName=${userName}`);
+        const response = await fetch(`http://localhost:8081/getToken?userName=${userName}`);
 
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -63,7 +63,7 @@ function handleFormSubmit(e) {
 
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
-    const apiUrl = `http://localhost:8080/createPlayer`;
+    const apiUrl = `http://localhost:8081/createPlayer`;
 
     const params = new URLSearchParams();
     params.append('name', username);

@@ -26,7 +26,7 @@ function createTableHeader(table, tableNr) {
     }
 }
 
-fetch('http://localhost:8080/getPlayerList')
+fetch('http://localhost:8081/getPlayerList')
     .then(response => {
         return response.json();
     })
@@ -55,7 +55,7 @@ fetch('http://localhost:8080/getPlayerList')
             row.insertCell().innerText = formattedDate;
 
             row.addEventListener('click', () => {
-                fetch(`http://localhost:8080/getScores?name=${player.name}`)
+                fetch(`http://localhost:8081/getScores?name=${player.name}`)
                     .then(response => response.json())
                     .then(scores => {
                         while (table.firstChild) {

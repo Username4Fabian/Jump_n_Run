@@ -358,7 +358,7 @@ function updateTimeSinceStart() {
 }
 
 function createScore(score, level, playtime, name) {
-    const url = 'http://localhost:8080/createScore';
+    const url = 'http://localhost:8081/createScore';
     const data = {
         score: score,
         level: level,
